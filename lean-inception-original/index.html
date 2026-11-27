@@ -1,0 +1,717 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lean Inception Original</title>
+<style>
+:root{
+  --bg:#f5f6fa; --panel:#fff; --ink:#1f2330; --muted:#6b7280; --line:#e5e7eb;
+  --accent:#4f46e5; --accent-soft:#eef2ff;
+  --green:#16a34a; --yellow:#eab308; --red:#dc2626;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
+button{font:inherit;cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:8px;padding:6px 12px}
+button:hover{border-color:#c7cad3}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+input,textarea,select{font:inherit;color:inherit;border:1px solid var(--line);border-radius:8px;padding:7px 9px;background:#fff;width:100%}
+input:focus,textarea:focus,select:focus{outline:2px solid var(--accent-soft);border-color:var(--accent)}
+textarea{resize:vertical}
+
+.app{display:grid;grid-template-columns:270px 1fr;min-height:100vh}
+aside{background:#141827;color:#d6d9e3;padding:20px 14px;display:flex;flex-direction:column;gap:14px;position:sticky;top:0;height:100vh;overflow:auto}
+.brand{font-size:20px;color:#fff;letter-spacing:.3px}
+.brand small{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:#8a90a6;margin-top:2px}
+.back{color:#8a90a6;font-size:12px;text-decoration:none;margin-bottom:-8px}
+.back:hover{color:#fff}
+.brand b{color:#a5b4fc}
+.proj label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#8a90a6}
+.proj select{margin:6px 0;background:#1f2437;color:#fff;border-color:#2c3350}
+.proj .row{display:flex;gap:6px}
+.proj .row button,.foot button{background:#1f2437;border-color:#2c3350;color:#d6d9e3;font-size:12px;padding:5px 8px}
+.proj .row button:hover,.foot button:hover{border-color:#4b5578}
+.progress{height:6px;background:#2a3047;border-radius:9px;overflow:hidden}
+.progress div{height:100%;background:#a5b4fc;transition:width .3s}
+.ptext{font-size:12px;color:#8a90a6;margin-top:-8px}
+nav{display:flex;flex-direction:column;gap:2px}
+.navi{display:flex;align-items:center;gap:10px;text-align:left;background:transparent;border:0;color:#c4c8d6;padding:8px;border-radius:8px}
+.navi:hover{background:#1f2437}
+.navi.on{background:#2a3050;color:#fff}
+.navi .num{flex:none;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:11px;background:#2a3047}
+.navi.done .num{background:#16a34a;color:#fff}
+.foot{margin-top:auto;display:flex;flex-direction:column;gap:6px}
+
+main{padding:28px 36px 60px;max-width:1200px;width:100%}
+header h1{margin:4px 0 6px;font-size:26px}
+.kicker{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);font-weight:600}
+.help{color:var(--muted);margin:0 0 20px;max-width:760px;line-height:1.5}
+.muted{color:var(--muted)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:16px}
+.empty{color:var(--muted);font-style:italic}
+.x{border:0;background:transparent;color:#9ca3af;font-size:18px;line-height:1;padding:2px 6px}
+.x:hover{color:var(--red)}
+.addbox{display:flex;gap:8px;margin-top:10px}
+.addbox input{flex:1}
+.addcard{border:2px dashed #d1d5db;background:transparent;color:var(--muted);min-height:120px;font-size:15px}
+.addcard:hover{border-color:var(--accent);color:var(--accent)}
+.toolbar{display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
+.pager{display:flex;justify-content:space-between;margin-top:28px}
+.warn{background:#fffbeb;border:1px solid #fde68a;color:#92400e;border-radius:10px;padding:10px 14px;margin-bottom:16px}
+.tag{font-size:11px;background:#fef3c7;color:#92400e;border-radius:6px;padding:1px 6px;margin-left:6px}
+
+/* Visión */
+.vgrid{display:grid;grid-template-columns:150px 1fr;gap:10px 14px;align-items:center}
+.vgrid label{text-align:right;font-weight:600;color:var(--muted)}
+.quote{background:var(--accent-soft);border-color:#c7d2fe}
+.quote p{font-size:18px;line-height:1.6;margin:8px 0 0}
+.blank{color:#9ca3af}
+
+/* Es / No es */
+.quad{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.qcol{border-radius:12px;padding:14px;border:1px solid var(--line)}
+.qcol h3{margin:0 0 10px}
+.q-es{background:#f0fdf4}.q-noes{background:#fef2f2}.q-hace{background:#eff6ff}.q-nohace{background:#fff7ed}
+.stickies{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px}
+.sticky{position:relative;background:#fff;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.sticky textarea{border:0;background:transparent;padding:10px 26px 10px 10px}
+.sticky .x{position:absolute;top:4px;right:2px}
+
+/* Objetivos */
+.goals{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px}
+.goals li{display:flex;gap:8px;align-items:center}
+.gnum,.snum{flex:none;width:26px;height:26px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-weight:700;font-size:12px}
+.mv{border:0;background:transparent;color:#9ca3af;padding:2px 4px}
+.mv:hover{color:var(--accent)}
+
+/* Personas */
+.grid3{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.grid3 .card{margin:0}
+.ph{display:flex;gap:10px;align-items:center;margin-bottom:10px}
+.avatar{flex:none;width:40px;height:40px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;font-weight:700;font-size:18px}
+.pname{font-weight:600}
+.fl{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-top:8px}
+.fl textarea{margin-top:4px;font-weight:400;color:var(--ink)}
+
+/* Tablas */
+.tablewrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:12px;color:var(--muted);font-weight:600;padding:6px;border-bottom:1px solid var(--line)}
+td{padding:6px;border-bottom:1px solid #f1f2f5;vertical-align:middle}
+tr.pending td:first-child{color:#92400e}
+
+/* Revisión */
+.legend{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:12px;color:var(--muted)}
+.dot{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:middle;margin-right:4px}
+.dot.green{background:var(--green)}.dot.yellow{background:var(--yellow)}.dot.red{background:var(--red)}
+.segs{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg{border:0;border-radius:0;border-right:1px solid var(--line);padding:5px 10px;min-width:40px;color:var(--muted)}
+.seg:last-child{border-right:0}
+.seg.on{background:var(--accent);color:#fff}
+.seg.c-green.on{background:#dcfce7}.seg.c-yellow.on{background:#fef9c3}.seg.c-red.on{background:#fee2e2}
+.seg .dot{margin:0}
+
+/* Recorridos */
+.jh{display:flex;gap:8px;align-items:center;margin-bottom:12px}
+.jname{font-weight:600;font-size:16px}
+.jh select{max-width:220px}
+.steps{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px}
+.srow{display:flex;gap:8px;align-items:center}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 0 34px}
+.chip{font-size:12px;padding:3px 9px;border-radius:999px;color:var(--muted)}
+.chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+
+/* Secuenciador */
+.rules ol{margin:8px 0 0;padding-left:20px;line-height:1.7}
+.rules summary{cursor:pointer;font-weight:600}
+.board{display:flex;gap:12px;overflow-x:auto;padding-bottom:10px;align-items:flex-start}
+.col{flex:0 0 240px;background:#eceef4;border-radius:12px;padding:10px;border:2px solid transparent}
+.col.backlog{background:#e5e7eb}
+.col.mvp{background:#e0e7ff;border-color:#a5b4fc}
+.col.over{border-color:var(--accent);border-style:dashed}
+.colh{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+.sums{font-size:12px;color:var(--muted)}
+.mvpbtn{width:100%;font-size:12px;padding:4px;margin-bottom:8px;background:transparent}
+.mvpbtn.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.cards{display:flex;flex-direction:column;gap:8px;min-height:60px}
+.fcard{background:#fff;border-radius:8px;padding:9px 10px;box-shadow:0 1px 2px rgba(0,0,0,.08);cursor:grab;display:grid;grid-template-columns:auto 1fr;gap:2px 6px;align-items:center}
+.fcard small{grid-column:2;color:var(--muted);letter-spacing:.5px}
+.dropzone{border:2px dashed #cbd0db;border-radius:8px;padding:16px;text-align:center;color:#9ca3af;font-size:12px}
+.viol{list-style:none;padding:8px;margin:8px 0 0;background:#fef2f2;border-radius:8px;color:#991b1b;font-size:12px;line-height:1.5}
+.ok{margin-top:8px;font-size:12px;color:var(--green)}
+
+/* Canvas MVP */
+.canvas{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.mblock{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column}
+.mblock.wide{grid-column:1/-1}
+.mblock h3{margin:0 0 8px;font-size:14px}
+.mblock textarea{flex:1;min-height:140px;border:0;padding:0}
+.mblock textarea:focus{outline:none}
+
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#141827;color:#fff;padding:10px 18px;border-radius:10px;opacity:0;transition:opacity .25s;pointer-events:none}
+#toast.show{opacity:1}
+
+@media (max-width:900px){
+  .app{grid-template-columns:1fr}
+  aside{position:static;height:auto}
+  main{padding:20px 16px}
+  .quad,.canvas{grid-template-columns:1fr}
+  .vgrid{grid-template-columns:1fr}.vgrid label{text-align:left}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside id="side"></aside>
+  <main id="main"></main>
+</div>
+<input type="file" id="fileIn" accept=".json,application/json" hidden>
+<div id="toast"></div>
+
+<script>
+/* ============ Estado y almacenamiento ============ */
+const KEY = 'lean-inception-v1';
+let S;
+
+const uid = () => Math.random().toString(36).slice(2, 10);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const trunc = (s, n = 40) => (s || '').length > n ? s.slice(0, n) + '…' : (s || '');
+const sum = (arr, k) => arr.reduce((a, x) => a + (+x[k] || 0), 0);
+
+function blankProject(name) {
+  return {
+    id: uid(), name: name || 'Nueva inception', created: new Date().toISOString(),
+    vision: {cliente:'', problema:'', nombre:'', categoria:'', beneficio:'', competencia:'', diferencial:''},
+    isnot: {es:[], noes:[], hace:[], nohace:[]},
+    goals: [], personas: [], features: [], journeys: [],
+    waveCount: 3, mvpWave: 0,
+    mvp: {propuesta:'', personas:'', recorridos:'', funcionalidades:'', resultado:'', metricas:'', coste:''}
+  };
+}
+
+function load() {
+  try { S = JSON.parse(localStorage.getItem(KEY)); } catch (e) { S = null; }
+  if (!S || !S.projects || !Object.keys(S.projects).length) {
+    const p = blankProject('Mi primera inception');
+    S = {projects: {[p.id]: p}, currentId: p.id, step: 'vision'};
+  }
+  if (!S.projects[S.currentId]) S.currentId = Object.keys(S.projects)[0];
+  if (!S.step) S.step = 'vision';
+}
+function save() { localStorage.setItem(KEY, JSON.stringify(S)); }
+const P = () => S.projects[S.currentId];
+
+// Resuelve rutas tipo "isnot.es" o "journeys.<id>.steps"
+function resolve(path) {
+  let cur = P();
+  for (const seg of path.split('.')) cur = Array.isArray(cur) ? cur.find(x => x.id === seg) : cur[seg];
+  return cur;
+}
+
+const FACTORIES = {
+  es: t => ({id: uid(), text: t}), noes: t => ({id: uid(), text: t}),
+  hace: t => ({id: uid(), text: t}), nohace: t => ({id: uid(), text: t}),
+  goals: t => ({id: uid(), text: t}),
+  personas: () => ({id: uid(), name: '', profile: '', behavior: '', needs: ''}),
+  features: t => ({id: uid(), name: t, desc: '', goalId: '', personaId: '', dependsOn: '',
+                   confidence: 'green', effort: 1, business: 1, ux: 1, wave: 0, reviewed: false}),
+  journeys: () => ({id: uid(), name: 'Nuevo recorrido', personaId: '', steps: []}),
+  steps: t => ({id: uid(), text: t, featureIds: []}),
+};
+const NEEDS_TEXT = ['es','noes','hace','nohace','goals','features','steps'];
+
+/* ============ Actividades ============ */
+const STEPS = [
+  {key:'vision', title:'Visión del producto',
+   help:'Define en una frase qué es el producto y para quién. Truco: divide al equipo en grupos, que cada uno complete una parte de la frase y luego consolidad juntos.',
+   done:p => Object.values(p.vision).every(v => v.trim())},
+  {key:'isnot', title:'Es / No es / Hace / No hace',
+   help:'Describir un producto por lo que NO es ayuda mucho a acotarlo. Escribe tarjetas en cada cuadrante.',
+   done:p => Object.values(p.isnot).every(a => a.length)},
+  {key:'goals', title:'Objetivos del producto',
+   help:'Cada participante escribe los 3 objetivos de negocio más importantes. Agrupadlos, eliminad duplicados y ordenadlos por importancia.',
+   done:p => p.goals.length > 0},
+  {key:'personas', title:'Personas',
+   help:'Describe a los usuarios del producto: quién es, cómo se comporta hoy y qué necesita. Las usarás en los recorridos.',
+   done:p => p.personas.length > 0},
+  {key:'features', title:'Funcionalidades',
+   help:'Lista lo que el producto hace para que una persona alcance un objetivo. Vincula cada funcionalidad a un objetivo y a una persona.',
+   done:p => p.features.length > 0},
+  {key:'review', title:'Revisión técnica, de negocio y UX',
+   help:'Para cada funcionalidad valora: confianza (¿sabemos qué y cómo hacerlo?), esfuerzo (E), valor de negocio ($) y valor de UX (♥).',
+   done:p => p.features.length > 0 && p.features.every(f => f.reviewed)},
+  {key:'journeys', title:'Recorridos de usuario',
+   help:'Describe paso a paso cómo una persona usa el producto para lograr un objetivo, y marca qué funcionalidades intervienen en cada paso.',
+   done:p => p.journeys.some(j => j.steps.length)},
+  {key:'sequencer', title:'Secuenciador',
+   help:'Arrastra las funcionalidades a olas de entrega respetando las reglas. Después marca la ola donde termina el MVP.',
+   done:p => p.features.some(f => f.wave > 0)},
+  {key:'mvp', title:'Canvas MVP',
+   help:'Resume el MVP: propuesta, personas, recorridos, funcionalidades, resultado esperado, métricas y coste/cronograma.',
+   done:p => !!p.mvp.propuesta.trim()},
+];
+
+/* ============ Helpers de UI ============ */
+const addBox = (path, ph) =>
+  `<div class="addbox"><input data-addto="${path}" placeholder="${esc(ph)}"><button data-action="add" data-list="${path}">Añadir</button></div>`;
+const delBtn = (path, id) => `<button class="x" title="Eliminar" data-action="del" data-list="${path}" data-id="${id}">×</button>`;
+const moveBtns = (path, id) =>
+  `<button class="mv" title="Subir" data-action="up" data-list="${path}" data-id="${id}">▲</button><button class="mv" title="Bajar" data-action="down" data-list="${path}" data-id="${id}">▼</button>`;
+const ta = (list, item, field, label, ph) =>
+  `<label class="fl">${label}<textarea rows="3" data-list="${list}" data-id="${item.id}" data-field="${field}" placeholder="${esc(ph)}">${esc(item[field])}</textarea></label>`;
+const options = (items, selected, labelFn, empty = '—') =>
+  `<option value="">${empty}</option>` + items.map(x => `<option value="${x.id}" ${x.id === selected ? 'selected' : ''}>${esc(trunc(labelFn(x)))}</option>`).join('');
+const emptyMsg = (msg, goto) =>
+  `<div class="card"><p class="empty">${msg}</p><button class="primary" data-action="go" data-step="${goto}">Ir a ${STEPS.find(s => s.key === goto).title}</button></div>`;
+
+function visionText(v) {
+  const b = (k, ph) => v[k].trim() ? `<b>${esc(v[k])}</b>` : `<span class="blank">[${ph}]</span>`;
+  return `Para ${b('cliente','cliente')}, cuyo ${b('problema','problema')}, el ${b('nombre','producto')} es un ${b('categoria','categoría')} que ${b('beneficio','beneficio')}. A diferencia de ${b('competencia','competencia')}, nuestro producto ${b('diferencial','diferencial')}.`;
+}
+function visionPlain(v) {
+  const b = k => v[k].trim() || '___';
+  return `Para ${b('cliente')}, cuyo ${b('problema')}, el ${b('nombre')} es un ${b('categoria')} que ${b('beneficio')}. A diferencia de ${b('competencia')}, nuestro producto ${b('diferencial')}.`;
+}
+
+function checkWave(p, w) {
+  const fs = p.features.filter(f => f.wave === w);
+  if (!fs.length) return [];
+  const r = [];
+  if (fs.length > 3) r.push('Más de 3 tarjetas en la ola');
+  if (fs.filter(f => f.confidence === 'red').length > 1) r.push('Más de 1 tarjeta roja');
+  if (fs.filter(f => f.confidence !== 'green').length >= 3) r.push('3 tarjetas amarillas o rojas juntas');
+  if (sum(fs, 'effort') > 5) r.push(`Esfuerzo total ${sum(fs,'effort')} > 5 (E)`);
+  if (sum(fs, 'business') < 4) r.push(`Valor de negocio ${sum(fs,'business')} < 4 ($)`);
+  if (sum(fs, 'ux') < 4) r.push(`Valor de UX ${sum(fs,'ux')} < 4 (♥)`);
+  fs.forEach(f => {
+    const d = f.dependsOn && p.features.find(x => x.id === f.dependsOn);
+    if (d && (!d.wave || d.wave >= w)) r.push(`«${esc(f.name)}» depende de «${esc(d.name)}», que debe ir en una ola anterior`);
+  });
+  return r;
+}
+
+/* ============ Vistas ============ */
+const VIEWS = {
+  vision: p => {
+    const v = p.vision;
+    const f = (k, ph) => `<input data-obj="vision" data-field="${k}" value="${esc(v[k])}" placeholder="${ph}">`;
+    return `<div class="card"><div class="vgrid">
+      <label>Para</label>${f('cliente','cliente final / segmento')}
+      <label>cuyo</label>${f('problema','problema que necesita resolver')}
+      <label>el</label>${f('nombre','nombre del producto')}
+      <label>es un</label>${f('categoria','categoría del producto')}
+      <label>que</label>${f('beneficio','beneficio clave, razón para usarlo')}
+      <label>A diferencia de</label>${f('competencia','alternativa / competencia')}
+      <label>nuestro producto</label>${f('diferencial','diferencial')}
+    </div></div>
+    <div class="card quote"><div class="kicker">Así queda la visión</div><p id="vprev">${visionText(v)}</p></div>`;
+  },
+
+  isnot: p => {
+    const Q = [['es','Es','q-es'], ['noes','No es','q-noes'], ['hace','Hace','q-hace'], ['nohace','No hace','q-nohace']];
+    return `<div class="quad">${Q.map(([k, t, c]) => `
+      <div class="qcol ${c}"><h3>${t}</h3>
+        <div class="stickies">${p.isnot[k].map(it => `
+          <div class="sticky"><textarea rows="2" data-list="isnot.${k}" data-id="${it.id}" data-field="text">${esc(it.text)}</textarea>${delBtn('isnot.' + k, it.id)}</div>`).join('')}
+        </div>
+        ${addBox('isnot.' + k, 'Escribe y pulsa Enter')}
+      </div>`).join('')}</div>`;
+  },
+
+  goals: p => `<div class="card">
+    <ol class="goals">${p.goals.map((g, i) => `
+      <li><span class="gnum">${i + 1}</span><input data-list="goals" data-id="${g.id}" data-field="text" value="${esc(g.text)}">${moveBtns('goals', g.id)}${delBtn('goals', g.id)}</li>`).join('')}
+    </ol>
+    ${p.goals.length ? '' : '<p class="empty">Aún no hay objetivos.</p>'}
+    ${addBox('goals', 'Nuevo objetivo, p. ej. «Reducir llamadas al soporte»')}
+  </div>`,
+
+  personas: p => `<div class="grid3">${p.personas.map(x => `
+    <div class="card">
+      <div class="ph"><div class="avatar">${esc((x.name || '?').trim().charAt(0).toUpperCase() || '?')}</div>
+        <input class="pname" data-list="personas" data-id="${x.id}" data-field="name" value="${esc(x.name)}" placeholder="Nombre / apodo">${delBtn('personas', x.id)}</div>
+      ${ta('personas', x, 'profile', 'Perfil', 'Edad, profesión, contexto…')}
+      ${ta('personas', x, 'behavior', 'Comportamiento', 'Cómo actúa hoy, hábitos…')}
+      ${ta('personas', x, 'needs', 'Necesidades', 'Qué busca, qué le frustra…')}
+    </div>`).join('')}
+    <button class="card addcard" data-action="add" data-list="personas">+ Añadir persona</button></div>`,
+
+  features: p => {
+    const orphanGoals = p.goals.filter(g => g.text.trim() && !p.features.some(f => f.goalId === g.id));
+    return `${p.features.length && orphanGoals.length ? `<div class="warn">Objetivos sin ninguna funcionalidad: ${orphanGoals.map(g => '«' + esc(g.text) + '»').join(', ')}</div>` : ''}
+    <div class="card"><div class="tablewrap"><table>
+      <thead><tr><th>Funcionalidad</th><th>Descripción</th><th>Objetivo</th><th>Persona</th><th>Depende de</th><th></th></tr></thead>
+      <tbody>${p.features.map(f => `<tr>
+        <td><input data-list="features" data-id="${f.id}" data-field="name" value="${esc(f.name)}"></td>
+        <td><input data-list="features" data-id="${f.id}" data-field="desc" value="${esc(f.desc)}" placeholder="Opcional"></td>
+        <td><select data-list="features" data-id="${f.id}" data-field="goalId">${options(p.goals, f.goalId, g => g.text)}</select></td>
+        <td><select data-list="features" data-id="${f.id}" data-field="personaId">${options(p.personas, f.personaId, x => x.name || 'Sin nombre')}</select></td>
+        <td><select data-list="features" data-id="${f.id}" data-field="dependsOn">${options(p.features.filter(o => o.id !== f.id), f.dependsOn, o => o.name)}</select></td>
+        <td>${delBtn('features', f.id)}</td></tr>`).join('')}
+      </tbody></table></div>
+      ${p.features.length ? '' : '<p class="empty">Aún no hay funcionalidades.</p>'}
+      ${addBox('features', 'Nueva funcionalidad, p. ej. «Reservar pista»')}
+    </div>`;
+  },
+
+  review: p => {
+    if (!p.features.length) return emptyMsg('Primero añade funcionalidades.', 'features');
+    const conf = [['green','Verde','sabemos qué hacer y cómo'], ['yellow','Amarillo','dudas sobre qué o cómo'], ['red','Rojo','no sabemos ni qué ni cómo']];
+    const scale = (f, field, sym) => [1, 2, 3].map(n =>
+      `<button class="seg ${f[field] === n ? 'on' : ''}" data-action="set" data-list="features" data-id="${f.id}" data-field="${field}" data-value="${n}">${sym.repeat(n)}</button>`).join('');
+    return `<div class="legend">${conf.map(([k, t, d]) => `<span><i class="dot ${k}"></i><b>${t}</b>: ${d}</span>`).join('')}</div>
+    <div class="card"><div class="tablewrap"><table>
+      <thead><tr><th>Funcionalidad</th><th>Confianza</th><th>Esfuerzo</th><th>Negocio</th><th>UX</th></tr></thead>
+      <tbody>${p.features.map(f => `<tr class="${f.reviewed ? '' : 'pending'}">
+        <td>${esc(f.name)}${f.reviewed ? '' : '<span class="tag">pendiente</span>'}</td>
+        <td><div class="segs">${conf.map(([k, t]) => `<button class="seg c-${k} ${f.confidence === k ? 'on' : ''}" title="${t}" data-action="set" data-list="features" data-id="${f.id}" data-field="confidence" data-value="${k}"><i class="dot ${k}"></i></button>`).join('')}</div></td>
+        <td><div class="segs">${scale(f, 'effort', 'E')}</div></td>
+        <td><div class="segs">${scale(f, 'business', '$')}</div></td>
+        <td><div class="segs">${scale(f, 'ux', '♥')}</div></td></tr>`).join('')}
+      </tbody></table></div></div>`;
+  },
+
+  journeys: p => {
+    const used = new Set(p.journeys.flatMap(j => j.steps.flatMap(s => s.featureIds)));
+    const unused = p.features.filter(f => !used.has(f.id));
+    return `${p.journeys.length && unused.length ? `<div class="warn">Funcionalidades que no aparecen en ningún recorrido: ${unused.map(f => '«' + esc(f.name) + '»').join(', ')}</div>` : ''}
+    ${p.journeys.map(j => {
+      const sp = `journeys.${j.id}.steps`;
+      return `<div class="card">
+        <div class="jh"><input class="jname" data-list="journeys" data-id="${j.id}" data-field="name" value="${esc(j.name)}">
+          <select data-list="journeys" data-id="${j.id}" data-field="personaId">${options(p.personas, j.personaId, x => x.name || 'Sin nombre', 'Persona…')}</select>${delBtn('journeys', j.id)}</div>
+        <ol class="steps">${j.steps.map((s, i) => `<li>
+          <div class="srow"><span class="snum">${i + 1}</span><input data-list="${sp}" data-id="${s.id}" data-field="text" value="${esc(s.text)}">${moveBtns(sp, s.id)}${delBtn(sp, s.id)}</div>
+          ${p.features.length ? `<div class="chips">${p.features.map(f => `<button class="chip ${s.featureIds.includes(f.id) ? 'on' : ''}" data-action="togglefeat" data-j="${j.id}" data-s="${s.id}" data-f="${f.id}">${esc(f.name)}</button>`).join('')}</div>` : ''}
+        </li>`).join('')}</ol>
+        ${addBox(sp, 'Siguiente paso, p. ej. «Abre la app el viernes por la tarde»')}
+      </div>`;
+    }).join('')}
+    <button class="card addcard" style="width:100%" data-action="add" data-list="journeys">+ Añadir recorrido</button>`;
+  },
+
+  sequencer: p => {
+    if (!p.features.length) return emptyMsg('Primero añade funcionalidades.', 'features');
+    const cols = [0, ...Array.from({length: p.waveCount}, (_, i) => i + 1)];
+    const fcard = f => `<div class="fcard" draggable="true" data-fid="${f.id}"><i class="dot ${f.confidence}"></i><span>${esc(f.name)}</span><small>${'E'.repeat(f.effort)} · ${'$'.repeat(f.business)} · ${'♥'.repeat(f.ux)}</small></div>`;
+    return `<details class="card rules"><summary>Reglas del secuenciador</summary><ol>
+      <li>Una ola puede tener como máximo 3 tarjetas.</li>
+      <li>Una ola no puede tener más de 1 tarjeta roja.</li>
+      <li>Una ola no puede tener 3 tarjetas amarillas o rojas juntas.</li>
+      <li>La suma de esfuerzo no puede superar 5 E.</li>
+      <li>La suma de valor no puede ser menor que 4 $ y 4 ♥.</li>
+      <li>Si una tarjeta depende de otra, la otra debe ir en una ola anterior.</li></ol></details>
+    <div class="toolbar"><button data-action="wave-add">+ Añadir ola</button><button data-action="wave-del">− Quitar última ola</button>
+      <span class="muted">Arrastra las tarjetas entre columnas.</span></div>
+    <div class="board">${cols.map(w => {
+      const fs = p.features.filter(f => (f.wave || 0) === w);
+      const v = w ? checkWave(p, w) : [];
+      const isMvp = w && p.mvpWave && w <= p.mvpWave;
+      return `<div class="col ${w ? '' : 'backlog'} ${isMvp ? 'mvp' : ''}" data-drop="${w}">
+        <div class="colh"><b>${w ? 'Ola ' + w : 'Sin asignar'}</b>${w ? `<span class="sums">E ${sum(fs,'effort')} · $ ${sum(fs,'business')} · ♥ ${sum(fs,'ux')}</span>` : ''}</div>
+        ${w ? `<button class="mvpbtn ${p.mvpWave === w ? 'on' : ''}" data-action="mvpcut" data-w="${w}">${p.mvpWave === w ? '✓ Aquí termina el MVP' : 'Marcar fin del MVP'}</button>` : ''}
+        <div class="cards">${fs.map(fcard).join('') || '<div class="dropzone">Arrastra aquí</div>'}</div>
+        ${v.length ? `<ul class="viol">${v.map(x => `<li>⚠ ${x}</li>`).join('')}</ul>` : (w && fs.length ? '<div class="ok">✓ Cumple las reglas</div>' : '')}
+      </div>`;
+    }).join('')}</div>`;
+  },
+
+  mvp: p => {
+    const m = p.mvp;
+    const b = (k, t, ph, cls = '') => `<div class="mblock ${cls}"><h3>${t}</h3><textarea data-obj="mvp" data-field="${k}" placeholder="${ph}">${esc(m[k])}</textarea></div>`;
+    return `<div class="toolbar"><button data-action="autofill">Autocompletar desde las actividades anteriores</button><span class="muted">Solo rellena los bloques vacíos.</span></div>
+    <div class="canvas">
+      ${b('propuesta', 'Propuesta del MVP', '¿Cuál es la propuesta de este MVP?', 'wide')}
+      ${b('personas', 'Personas segmentadas', '¿Para quién es este MVP?')}
+      ${b('recorridos', 'Recorridos', '¿Qué recorridos atiende?')}
+      ${b('funcionalidades', 'Funcionalidades', '¿Qué construimos en este MVP?')}
+      ${b('resultado', 'Resultado esperado', '¿Qué aprendizaje o resultado buscamos?')}
+      ${b('metricas', 'Métricas para validar hipótesis', '¿Cómo mediremos el resultado?')}
+      ${b('coste', 'Coste y cronograma', '¿Cuánto cuesta y cuándo estará listo?')}
+    </div>`;
+  },
+};
+
+/* ============ Render ============ */
+const side = document.getElementById('side');
+const main = document.getElementById('main');
+
+function renderSide() {
+  const p = P();
+  const done = STEPS.filter(s => s.done(p)).length;
+  side.innerHTML = `
+    <a class="back" href="../">← PM Toolkit</a>
+    <div class="brand">Lean <b>Inception</b><small>Original</small></div>
+    <div class="proj"><label>Proyecto</label>
+      <select id="projSel">${Object.values(S.projects).map(x => `<option value="${x.id}" ${x.id === p.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select>
+      <div class="row"><button data-action="proj-new">+ Nuevo</button><button data-action="proj-rename">Renombrar</button><button data-action="proj-del">Borrar</button></div>
+    </div>
+    <div class="progress"><div style="width:${done / STEPS.length * 100}%"></div></div>
+    <div class="ptext">${done} de ${STEPS.length} actividades completadas</div>
+    <nav>${STEPS.map((s, i) => `<button class="navi ${s.key === S.step ? 'on' : ''} ${s.done(p) ? 'done' : ''}" data-action="go" data-step="${s.key}"><span class="num">${s.done(p) ? '✓' : i + 1}</span>${s.title}</button>`).join('')}</nav>
+    <div class="foot">
+      <button data-action="export-md">Exportar resumen (.md)</button>
+      <button data-action="export-json">Guardar copia (.json)</button>
+      <button data-action="import-json">Importar copia (.json)</button>
+      <button data-action="example">Cargar proyecto de ejemplo</button>
+    </div>`;
+}
+
+function render() {
+  renderSide();
+  const i = STEPS.findIndex(x => x.key === S.step);
+  const s = STEPS[i];
+  main.innerHTML = `
+    <header><div class="kicker">Actividad ${i + 1} de ${STEPS.length}</div><h1>${s.title}</h1><p class="help">${s.help}</p></header>
+    ${VIEWS[s.key](P())}
+    <div class="pager">
+      ${i > 0 ? `<button data-action="go" data-step="${STEPS[i - 1].key}">← ${STEPS[i - 1].title}</button>` : '<span></span>'}
+      ${i < STEPS.length - 1 ? `<button class="primary" data-action="go" data-step="${STEPS[i + 1].key}">${STEPS[i + 1].title} →</button>` : ''}
+    </div>`;
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toast.h); toast.h = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+/* ============ Acciones ============ */
+function addItem(path) {
+  const key = path.split('.').pop();
+  const input = document.querySelector(`[data-addto="${path}"]`);
+  const text = input ? input.value.trim() : '';
+  if (NEEDS_TEXT.includes(key) && !text) { input && input.focus(); return; }
+  resolve(path).push(FACTORIES[key](text));
+  save(); render();
+  const again = document.querySelector(`[data-addto="${path}"]`);
+  if (again) again.focus();
+}
+
+function deleteItem(path, id) {
+  const p = P(), list = resolve(path), item = list.find(x => x.id === id);
+  if (['personas','features','journeys'].includes(path) && !confirm(`¿Eliminar «${item.name || 'este elemento'}»?`)) return;
+  list.splice(list.indexOf(item), 1);
+  if (path === 'features') {
+    p.features.forEach(f => { if (f.dependsOn === id) f.dependsOn = ''; });
+    p.journeys.forEach(j => j.steps.forEach(s => s.featureIds = s.featureIds.filter(x => x !== id)));
+  }
+  if (path === 'personas') {
+    p.features.forEach(f => { if (f.personaId === id) f.personaId = ''; });
+    p.journeys.forEach(j => { if (j.personaId === id) j.personaId = ''; });
+  }
+  if (path === 'goals') p.features.forEach(f => { if (f.goalId === id) f.goalId = ''; });
+  save(); render();
+}
+
+function move(path, id, dir) {
+  const list = resolve(path), i = list.findIndex(x => x.id === id), j = i + dir;
+  if (j < 0 || j >= list.length) return;
+  [list[i], list[j]] = [list[j], list[i]];
+  save(); render();
+}
+
+function download(name, text, type) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([text], {type}));
+  a.download = name; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+const slug = s => (s || 'inception').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
+function autofill() {
+  const p = P(), m = p.mvp;
+  const lastWave = p.mvpWave || 1;
+  const mvpFeatures = p.features.filter(f => f.wave > 0 && f.wave <= lastWave);
+  const personaName = id => (p.personas.find(x => x.id === id) || {}).name;
+  const fill = {
+    propuesta: Object.values(p.vision).some(v => v.trim()) ? visionPlain(p.vision) : '',
+    personas: [...new Set([...mvpFeatures.map(f => f.personaId), ...p.journeys.map(j => j.personaId)].filter(Boolean))].map(personaName).filter(Boolean).map(n => '• ' + n).join('\n'),
+    recorridos: p.journeys.map(j => '• ' + j.name).join('\n'),
+    funcionalidades: mvpFeatures.map(f => `• ${f.name} (ola ${f.wave})`).join('\n'),
+  };
+  let n = 0;
+  for (const k in fill) if (!m[k].trim() && fill[k]) { m[k] = fill[k]; n++; }
+  save(); render();
+  toast(n ? `${n} bloque(s) autocompletado(s)` : 'No había bloques vacíos que se pudieran rellenar');
+}
+
+function toMarkdown(p) {
+  const name = id => (p.personas.find(x => x.id === id) || {}).name || '—';
+  const goal = id => (p.goals.find(x => x.id === id) || {}).text || '—';
+  const feat = id => (p.features.find(x => x.id === id) || {}).name || '';
+  const conf = {green: '🟢', yellow: '🟡', red: '🔴'};
+  let s = `# ${p.name}\n\n_Lean Inception · exportado el ${new Date().toLocaleDateString('es-ES')}_\n\n`;
+  s += `## 1. Visión del producto\n\n> ${visionPlain(p.vision)}\n\n`;
+  s += `## 2. Es / No es / Hace / No hace\n\n`;
+  [['es','Es'], ['noes','No es'], ['hace','Hace'], ['nohace','No hace']].forEach(([k, t]) => {
+    s += `**${t}**\n${p.isnot[k].map(x => '- ' + x.text).join('\n') || '- —'}\n\n`;
+  });
+  s += `## 3. Objetivos\n\n${p.goals.map((g, i) => `${i + 1}. ${g.text}`).join('\n') || '—'}\n\n`;
+  s += `## 4. Personas\n\n${p.personas.map(x => `### ${x.name || 'Sin nombre'}\n- **Perfil:** ${x.profile || '—'}\n- **Comportamiento:** ${x.behavior || '—'}\n- **Necesidades:** ${x.needs || '—'}`).join('\n\n') || '—'}\n\n`;
+  s += `## 5–6. Funcionalidades y revisión\n\n| Funcionalidad | Objetivo | Persona | Confianza | E | $ | ♥ | Ola |\n|---|---|---|---|---|---|---|---|\n`;
+  s += p.features.map(f => `| ${f.name} | ${goal(f.goalId)} | ${name(f.personaId)} | ${conf[f.confidence]} | ${f.effort} | ${f.business} | ${f.ux} | ${f.wave || '—'} |`).join('\n') + '\n\n';
+  s += `## 7. Recorridos\n\n${p.journeys.map(j => `### ${j.name} (${name(j.personaId)})\n${j.steps.map((st, i) => `${i + 1}. ${st.text}${st.featureIds.length ? ` _[${st.featureIds.map(feat).join(', ')}]_` : ''}`).join('\n')}`).join('\n\n') || '—'}\n\n`;
+  s += `## 8. Secuenciador\n\n`;
+  for (let w = 1; w <= p.waveCount; w++) {
+    const fs = p.features.filter(f => f.wave === w);
+    s += `**Ola ${w}${p.mvpWave && w <= p.mvpWave ? ' (MVP)' : ''}:** ${fs.map(f => f.name).join(', ') || '—'}\n\n`;
+  }
+  const M = [['propuesta','Propuesta'], ['personas','Personas segmentadas'], ['recorridos','Recorridos'], ['funcionalidades','Funcionalidades'], ['resultado','Resultado esperado'], ['metricas','Métricas'], ['coste','Coste y cronograma']];
+  s += `## 9. Canvas MVP\n\n${M.map(([k, t]) => `**${t}**\n\n${p.mvp[k] || '—'}`).join('\n\n')}\n`;
+  return s;
+}
+
+function exampleProject() {
+  const p = blankProject('Ejemplo · Reservas de pádel');
+  p.vision = {cliente: 'jugadores amateurs de pádel', problema: 'pierden tiempo llamando a varios clubes para encontrar pista libre',
+    nombre: 'PistaYa', categoria: 'app móvil de reservas', beneficio: 'permite ver y reservar pistas libres cercanas en menos de un minuto',
+    competencia: 'llamar por teléfono o usar la web de cada club', diferencial: 'reúne la disponibilidad de todos los clubes de la zona en un solo lugar'};
+  const t = x => ({id: uid(), text: x});
+  p.isnot = {es: [t('Un buscador de pistas cercanas'), t('Una forma de pagar online')], noes: [t('Una red social'), t('Una tienda de material')],
+    hace: [t('Muestra disponibilidad en tiempo real'), t('Envía recordatorios')], nohace: [t('Organizar torneos'), t('Clases con entrenador')]};
+  p.goals = [t('Aumentar la ocupación de los clubes'), t('Reducir las llamadas a recepción'), t('Fidelizar a los jugadores')];
+  const pe = (name, profile, behavior, needs) => ({id: uid(), name, profile, behavior, needs});
+  p.personas = [
+    pe('Laura, la jugadora de los jueves', '34 años, consultora, juega 2 veces por semana', 'Organiza partidos por WhatsApp y llama a 3 clubes cada semana', 'Encontrar pista rápido a la salida del trabajo'),
+    pe('Andrés, gerente del club', '45 años, gestiona un club con 6 pistas', 'Lleva las reservas en un Excel y por teléfono', 'Llenar las horas valle y atender menos llamadas')];
+  const [L, A] = p.personas.map(x => x.id), [G1, G2, G3] = p.goals.map(g => g.id);
+  const fe = (name, goalId, personaId, confidence, effort, business, ux, wave) =>
+    ({id: uid(), name, desc: '', goalId, personaId, dependsOn: '', confidence, effort, business, ux, wave, reviewed: true});
+  p.features = [
+    fe('Buscar pistas libres por zona y hora', G2, L, 'green', 2, 3, 3, 1),
+    fe('Reservar pista', G1, L, 'green', 2, 3, 2, 1),
+    fe('Pago online', G1, L, 'yellow', 2, 2, 1, 2),
+    fe('Panel de disponibilidad para el club', G2, A, 'green', 1, 2, 2, 2),
+    fe('Recordatorio antes del partido', G3, L, 'green', 1, 1, 2, 2),
+    fe('Invitar a compañeros al partido', G3, L, 'red', 3, 2, 3, 3)];
+  const F = p.features.map(f => f.id);
+  p.features[1].dependsOn = F[0]; p.features[2].dependsOn = F[1];
+  p.journeys = [{id: uid(), name: 'Laura reserva para el jueves', personaId: L, steps: [
+    {id: uid(), text: 'Abre la app el martes por la noche', featureIds: []},
+    {id: uid(), text: 'Busca pistas libres el jueves a las 19:00 cerca de casa', featureIds: [F[0]]},
+    {id: uid(), text: 'Reserva y paga la pista', featureIds: [F[1], F[2]]},
+    {id: uid(), text: 'Recibe un recordatorio el jueves a mediodía', featureIds: [F[4]]}]}];
+  p.mvpWave = 1;
+  return p;
+}
+
+/* ============ Eventos ============ */
+document.addEventListener('input', e => {
+  const t = e.target, d = t.dataset;
+  if (d.obj) {
+    P()[d.obj][d.field] = t.value;
+    if (d.obj === 'vision') document.getElementById('vprev').innerHTML = visionText(P().vision);
+  } else if (d.list && d.id && d.field) {
+    resolve(d.list).find(x => x.id === d.id)[d.field] = t.value;
+  } else return;
+  save(); renderSide();
+});
+
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (t.id === 'projSel') { S.currentId = t.value; save(); render(); }
+  else if (t.tagName === 'SELECT' && t.dataset.list) render();
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.target.dataset.addto) { e.preventDefault(); addItem(e.target.dataset.addto); }
+});
+
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-action]');
+  if (!b) return;
+  const d = b.dataset, p = P();
+  switch (d.action) {
+    case 'go': S.step = d.step; save(); render(); window.scrollTo(0, 0); break;
+    case 'add': addItem(d.list); break;
+    case 'del': deleteItem(d.list, d.id); break;
+    case 'up': move(d.list, d.id, -1); break;
+    case 'down': move(d.list, d.id, 1); break;
+    case 'set': {
+      const item = resolve(d.list).find(x => x.id === d.id);
+      item[d.field] = isNaN(+d.value) ? d.value : +d.value;
+      if (d.list === 'features') item.reviewed = true;
+      save(); render(); break;
+    }
+    case 'togglefeat': {
+      const s = p.journeys.find(j => j.id === d.j).steps.find(x => x.id === d.s);
+      s.featureIds = s.featureIds.includes(d.f) ? s.featureIds.filter(x => x !== d.f) : [...s.featureIds, d.f];
+      save(); render(); break;
+    }
+    case 'wave-add': p.waveCount++; save(); render(); break;
+    case 'wave-del':
+      if (p.waveCount <= 1) return;
+      p.features.forEach(f => { if (f.wave === p.waveCount) f.wave = 0; });
+      if (p.mvpWave >= p.waveCount) p.mvpWave = p.waveCount - 1;
+      p.waveCount--; save(); render(); break;
+    case 'mvpcut': p.mvpWave = p.mvpWave === +d.w ? 0 : +d.w; save(); render(); break;
+    case 'autofill': autofill(); break;
+    case 'proj-new': {
+      const name = prompt('Nombre de la nueva inception:', 'Nueva inception');
+      if (!name) return;
+      const np = blankProject(name.trim());
+      S.projects[np.id] = np; S.currentId = np.id; S.step = 'vision'; save(); render(); break;
+    }
+    case 'proj-rename': {
+      const name = prompt('Nuevo nombre:', p.name);
+      if (name && name.trim()) { p.name = name.trim(); save(); render(); }
+      break;
+    }
+    case 'proj-del':
+      if (!confirm(`¿Borrar el proyecto «${p.name}»? Esta acción no se puede deshacer.`)) return;
+      delete S.projects[p.id];
+      if (!Object.keys(S.projects).length) { const np = blankProject('Mi primera inception'); S.projects[np.id] = np; }
+      S.currentId = Object.keys(S.projects)[0]; save(); render(); break;
+    case 'example': {
+      const ex = exampleProject();
+      S.projects[ex.id] = ex; S.currentId = ex.id; S.step = 'vision'; save(); render(); toast('Proyecto de ejemplo cargado'); break;
+    }
+    case 'export-md': download(slug(p.name) + '.md', toMarkdown(p), 'text/markdown'); break;
+    case 'export-json': download(slug(p.name) + '.json', JSON.stringify(p, null, 2), 'application/json'); break;
+    case 'import-json': document.getElementById('fileIn').click(); break;
+  }
+});
+
+document.getElementById('fileIn').addEventListener('change', async e => {
+  const file = e.target.files[0];
+  e.target.value = '';
+  if (!file) return;
+  try {
+    const data = JSON.parse(await file.text());
+    if (!data.vision || !Array.isArray(data.features)) throw new Error();
+    const np = Object.assign(blankProject(), data, {id: uid()});
+    S.projects[np.id] = np; S.currentId = np.id; save(); render();
+    toast(`Importado «${np.name}»`);
+  } catch { toast('El archivo no es una copia válida de Lean Inception'); }
+});
+
+// Arrastrar y soltar en el secuenciador
+document.addEventListener('dragstart', e => {
+  const c = e.target.closest && e.target.closest('.fcard');
+  if (c) e.dataTransfer.setData('text/plain', c.dataset.fid);
+});
+document.addEventListener('dragover', e => {
+  const col = e.target.closest && e.target.closest('[data-drop]');
+  if (!col) return;
+  e.preventDefault();
+  document.querySelectorAll('.col.over').forEach(x => x !== col && x.classList.remove('over'));
+  col.classList.add('over');
+});
+document.addEventListener('dragleave', e => {
+  const col = e.target.closest && e.target.closest('[data-drop]');
+  if (col && !col.contains(e.relatedTarget)) col.classList.remove('over');
+});
+document.addEventListener('drop', e => {
+  const col = e.target.closest && e.target.closest('[data-drop]');
+  if (!col) return;
+  e.preventDefault();
+  const f = P().features.find(x => x.id === e.dataTransfer.getData('text/plain'));
+  if (f) { f.wave = +col.dataset.drop; save(); render(); }
+});
+
+load();
+render();
+</script>
+</body>
+</html>
