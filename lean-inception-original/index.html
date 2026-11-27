@@ -604,6 +604,11 @@ function exampleProject() {
   return p;
 }
 
+// Analítica anónima (GoatCounter): solo se registra el nombre de la acción, nunca el contenido
+function track(name) {
+  try { if (window.goatcounter && window.goatcounter.count) window.goatcounter.count({path: "lean-inception-original/" + name, title: name, event: true}); } catch (e) {}
+}
+
 /* ============ Eventos ============ */
 document.addEventListener('input', e => {
   const t = e.target, d = t.dataset;
@@ -630,6 +635,8 @@ document.addEventListener('click', e => {
   const b = e.target.closest('[data-action]');
   if (!b) return;
   const d = b.dataset, p = P();
+  if (["export-md","export-json","import-json","example","proj-new","autofill"].includes(d.action)) track(d.action);
+  if (d.action === "go" && d.step !== S.step) track("paso/" + d.step);
   switch (d.action) {
     case 'go': S.step = d.step; save(); render(); window.scrollTo(0, 0); break;
     case 'add': addItem(d.list); break;
@@ -721,5 +728,6 @@ document.addEventListener('drop', e => {
 load();
 render();
 </script>
+<script data-goatcounter="https://pm-toolkit.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
